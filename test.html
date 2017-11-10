@@ -1,0 +1,294 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Hacking WebGL</title>
+    <script type="text/javascript" src="libs/gl-matrix.js"></script>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+      precision mediump float;
+
+      uniform mat4 modelMatrix, viewMatrix, projectionMatrix;
+      uniform float time;
+
+      attribute vec3 pos;
+      attribute vec2 texCoords;
+
+      varying vec2 tc;
+
+      void main() {
+        float d = -length(pos);
+        float z = 0.05 * sin(3.141592653589793 * d * 5.0 + time * 3.0);
+        tc = texCoords;
+        gl_Position =
+          projectionMatrix * viewMatrix *
+          modelMatrix * vec4(pos.xy, z, 1.0);
+      }
+    </script>
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+
+      uniform sampler2D image;
+      varying vec2 tc;
+
+      void main() {
+        gl_FragColor = texture2D(image, tc.st);
+      }
+    </script>
+    <script type="text/javascript" src="gl-matrix.js"></script>
+    <script type="text/javascript">
+
+    function createCanvas() {
+      var canvas = document.createElement('canvas');
+      document.getElementById('content').appendChild(canvas);
+      return canvas;
+    }
+
+    function createProgram(gl, shaderSpecs) {
+      var program = gl.createProgram();
+      for ( var i = 0 ; i < shaderSpecs.length ; i++ ) {
+        var spec = shaderSpecs[i];
+        var shader = gl.createShader(spec.type);
+        gl.shaderSource(
+          shader, document.getElementById(spec.container).text
+        );
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          throw gl.getShaderInfoLog(shader);
+        }
+        gl.attachShader(program, shader);
+        gl.deleteShader(shader);
+      }
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        throw gl.getProgramInfoLog(program);
+      }
+      return program;
+    }
+
+    var frameCount = 0, fpsTimer = null;
+
+    function resetFpsCounter() {
+      fpsTimer = setTimeout(function() {
+        fpsTimer = null;
+      }, 1000);
+    }
+
+    function render(gl, scene, time) {
+      if ( fpsTimer == null ) {
+        console.log(frameCount);
+        frameCount = 0;
+        resetFpsCounter();
+      }
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.useProgram(scene.program);
+
+      gl.uniform1f(scene.program.timeUniform, time / 1000);
+
+      gl.uniformMatrix4fv(
+        scene.program.modelMatrixUniform, gl.FALSE,
+        scene.object.modelMatrix);
+      gl.bindBuffer(gl.ARRAY_BUFFER, scene.object.buffer);
+      gl.bindTexture(gl.TEXTURE_2D, scene.object.texture);
+
+      var video = scene.object.textureSourceElement;
+      gl.texSubImage2D(
+        gl.TEXTURE_2D, 0, 0, 0, gl.RGBA,
+        gl.UNSIGNED_BYTE, video);
+
+      gl.drawArrays(
+        scene.object.primitiveType, 0,
+        scene.object.vertexCount);
+
+      gl.bindTexture(gl.TEXTURE_2D, null);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+      gl.useProgram(null);
+      frameCount++;
+      requestAnimationFrame(function(timestamp) {
+        render(gl, scene, timestamp);
+      });
+    }
+
+    function createFlatMesh(gl) {
+      var MAX_ROWS=64, MAX_COLS=64;
+      var points = [];
+
+      for ( var r = 0 ; r <= MAX_ROWS ; r++ ) {
+        for ( var c = 0 ; c <= MAX_COLS ; c++ ) {
+          points.push({
+            location: [-0.75 + (1.5 / MAX_COLS) * c,
+                        0.75 - (1.5 / MAX_ROWS) * r,
+                        0.0],
+            texture: [1.0 / MAX_COLS * c,
+                      1.0 / MAX_ROWS * r]
+          });
+        }
+      }
+      var OFFSET = function(R,C) {
+        return ((R) * ((MAX_COLS)+1) + (C));
+      };
+      var
+        vertices = [],
+        rotations = [-1,-1,-1,0,1,1,1,0,-1,-1,-1,0,1,1,1,0];
+      for ( var r = 1 ; r <= MAX_ROWS ; r += 2 ) {
+        for ( var c = 1 ; c <= MAX_COLS ; c += 2 ) {
+          for ( var i = 0 ; i < 8 ; i++ ) {
+            var off1 = OFFSET(r, c);
+            var off2 = OFFSET(r + rotations[i],   c + rotations[i+6]);
+            var off3 = OFFSET(r + rotations[i+1], c + rotations[i+7]);
+            Array.prototype.push.apply(
+              vertices, points[off1].location);
+            Array.prototype.push.apply(
+              vertices, points[off1].texture);
+            Array.prototype.push.apply(
+              vertices, points[off2].location);
+            Array.prototype.push.apply(
+              vertices, points[off2].texture);
+            Array.prototype.push.apply(
+              vertices, points[off3].location);
+            Array.prototype.push.apply(
+              vertices, points[off3].texture);
+          }
+        }
+      }
+
+      var buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(
+        gl.ARRAY_BUFFER, new Float32Array(vertices),
+        gl.STATIC_DRAW);
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+      return {
+        buffer: buffer,
+        primitiveType: gl.TRIANGLES,
+        vertexCount: vertices.length / 5
+      }
+    }
+
+    function loadTexture(gl, mesh, andThenFn) {
+      var texture = gl.createTexture();
+      navigator.getUserMedia = navigator.getUserMedia // WC3
+        || navigator.mozGetUserMedia // Mozilla
+        || navigator.webkitGetUserMedia; // Chrome
+      navigator.getUserMedia(
+        {video: true, audio:false},
+        function(stream) {
+          var video = document.getElementById('video');
+          video.src = URL.createObjectURL(stream);
+          video.onplaying = function() {
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+            gl.texImage2D(
+              gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+            gl.texParameteri(
+              gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(
+              gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(
+              gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(
+              gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            mesh.texture = texture;
+            mesh.textureSourceElement = video;
+            andThenFn();
+          };
+          video.play();
+      }, function(e) {
+        alert(e);
+      });
+    }
+
+    function init() {
+      var canvas = createCanvas();
+      var gl = canvas.getContext('experimental-webgl');
+      var resize = function() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        gl.viewport(0,0,canvas.width,canvas.height);
+      };
+      window.addEventListener('resize', resize);
+
+      resize();
+
+      gl.enable(gl.DEPTH_TEST);
+      gl.clearColor(0.0, 0.0, 0.0, 0.0);
+
+      var mesh = createFlatMesh(gl);
+
+      var program = createProgram(
+        gl,
+        [{container: 'vertex-shader', type: gl.VERTEX_SHADER},
+         {container: 'fragment-shader', type: gl.FRAGMENT_SHADER}]);
+
+      var projectionMatrix = mat4.create();
+      mat4.perspective(
+        projectionMatrix, 0.75, canvas.width/canvas.height,
+        0.1, 100);
+      var viewMatrix = mat4.create();
+      var modelMatrix = mat4.create();
+      mat4.translate(modelMatrix, modelMatrix, [0,0,-2]);
+      mat4.rotate(modelMatrix, modelMatrix, -1, [1,0,0]);
+
+      mesh.modelMatrix = modelMatrix;
+
+      gl.useProgram(program);
+
+      program.modelMatrixUniform =
+        gl.getUniformLocation(program, 'modelMatrix');
+      program.viewMatrixUniform =
+        gl.getUniformLocation(program, 'viewMatrix');
+      program.projectionMatrixUniform =
+        gl.getUniformLocation(program, 'projectionMatrix');
+      program.timeUniform =
+        gl.getUniformLocation(program, 'time');
+
+      gl.uniformMatrix4fv(
+        program.projectionMatrixUniform, gl.FALSE,
+        projectionMatrix);
+      gl.uniformMatrix4fv(
+        program.viewMatrixUniform, gl.FALSE, viewMatrix);
+      gl.uniform1f(
+        program.timeUniform, gl.FALSE, 0.0);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, mesh.buffer);
+
+      program.positionAttribute =
+        gl.getAttribLocation(program, 'pos');
+      program.textureCoordsAttribute =
+        gl.getAttribLocation(program, 'texCoords');
+      gl.enableVertexAttribArray(program.positionAttribute);
+      gl.enableVertexAttribArray(program.textureCoordsAttribute);
+      gl.vertexAttribPointer(
+        program.positionAttribute, 3, gl.FLOAT, false,
+        5 * Float32Array.BYTES_PER_ELEMENT,
+        0);
+      gl.vertexAttribPointer(
+        program.textureCoordsAttribute, 2, gl.FLOAT, false,
+        5 * Float32Array.BYTES_PER_ELEMENT,
+        3 * Float32Array.BYTES_PER_ELEMENT);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+      gl.useProgram(null);
+
+      loadTexture(gl, mesh,
+        function() {
+          requestAnimationFrame(function(timestamp) {
+            render(gl, {
+              program: program,
+              object: mesh
+            }, timestamp);
+          })
+        });
+    }
+    </script>
+  </head>
+  <body onLoad="init()">
+    <video
+      id="video"
+      width="640" height="480"
+      style="display:none">
+    </video>
+    <div id="content"></div>
+  </body>
+</html>
