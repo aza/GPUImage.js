@@ -32,15 +32,20 @@ THREE.FilterChain.prototype = {
     this.targets.push( target )
   },
 
-  Filter: function( shader, textureID ) {
-    return new FilterChainNode( this, shader, textureID )
+  filter: function( name, shader, numInputs ) {
+    return new FilterChainNode( this, name, shader, numInputs )
   }
 
 }
 
-function FilterChainNode ( parentFilterChain, shader, textureID ) {
+function FilterChainNode ( parentFilterChain, name, shader, numInputs ) {
 
-  this.textureID = ( textureID !== undefined ) ? textureID : "tDiffuse"
+  this.name = name
+
+  this.numInputs = numInputs == null ? 1 : numInputs
+  this._receivedInputs = []
+
+  this.textureID = "tDiffuse"
 
 	this.uniforms = THREE.UniformsUtils.clone( shader.uniforms )
 
@@ -73,9 +78,17 @@ FilterChainNode.prototype = {
 
   render: function( buffer ) {
 
-    if ( this.uniforms[this.textureID] ) {
-      this.uniforms[this.textureID].value = buffer
+    // Add the buffer to the buffer queue, wait until we have all of the
+    // inputs to continue
+    this._receivedInputs.push( buffer )
+    if( this._receivedInputs.length < this.numInputs ) return
+
+    for( var i=0; i<this.numInputs; i++){
+      var id = this.textureID + (i+1)
+      this.uniforms[id].value = this._receivedInputs[i]
     }
+
+    this._receivedInputs = []
 
     this.quad.material = this.material
 

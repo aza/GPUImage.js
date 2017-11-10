@@ -10,8 +10,7 @@
 THREE.EdgeShader = {
 
 	uniforms: {
-
-		"tDiffuse": { type: "t", value: null },
+		"tDiffuse1": { type: "t", value: null },
 		"aspect":    { type: "v2", value: new THREE.Vector2( 512, 512 ) },
 	},
 

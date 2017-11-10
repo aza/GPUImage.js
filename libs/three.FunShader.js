@@ -10,7 +10,7 @@
 THREE.FunShader = {
 
 	uniforms: {
-		"tDiffuse": { type: "t", value: null }
+		"tDiffuse1": { type: "t", value: null }
 	},
 
 	vertexShader: [
@@ -28,13 +28,13 @@ THREE.FunShader = {
 
 	fragmentShader: [
 
-		"uniform sampler2D tDiffuse;",
+		"uniform sampler2D tDiffuse1;",
 		"varying vec2 vUv;",
 
 		"void main(void)",
 		"{",
 
-			"vec3 sample = texture2D(tDiffuse, vUv ).rgb;",
+			"vec3 sample = texture2D(tDiffuse1, vUv ).rgb;",
 			"gl_FragColor = vec4(vec3(sample.g, sample.b, sample.r), 1.0);",
 
 		"}",

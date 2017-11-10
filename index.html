@@ -2,6 +2,7 @@
 <html>
     <head>
       <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta http-equiv="expires" content="0">
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/88/three.js"></script>
 
         <script type="text/javascript" src="libs/three.CopyShader.js"></script>
@@ -14,6 +15,7 @@
         <script type="text/javascript" src="libs/three.RenderPass.js"></script>
         <script type="text/javascript" src="libs/three.ShaderPass.js"></script>
         <script type="text/javascript" src="libs/SimplexNoise.js"></script>
+        <script type="text/javascript" src="libs/three.AddBlend.js"></script>
 
         <script src="libs/three.FilterChain.js"></script>
 
@@ -32,19 +34,17 @@
 
                 var filterChain = new THREE.FilterChain( renderer, scene, camera )
 
-                var f1 = filterChain.Filter( THREE.FunShader )
-                var f2 = filterChain.Filter( THREE.ZoomBlurShader )
-                var f3 = filterChain.Filter( THREE.ZoomBlurShader )
-                var f4 = filterChain.Filter( THREE.ZoomBlurShader )
-                var f5 = filterChain.Filter( THREE.ColorInvertShader )
+                var f1 = filterChain.filter( "fun", THREE.FunShader, 1 )
+                var f2 = filterChain.filter( "edge", THREE.EdgeShader, 1 )
+                var f3 = filterChain.filter( "add", THREE.MultiplyBlend, 2 )
 
                 filterChain.addTarget( f1 )
                 f1.addTarget( f2 )
-                f2.addTarget( f3 )
-                f3.addTarget( f4 )
-                f4.addTarget( f5 )
 
-                f5.addTarget( 'screen' )
+                f2.addTarget( f3 )
+                f1.addTarget( f3 )
+
+                f3.addTarget( 'screen' )
 
                 // video texture
                 var videoImage = document.createElement('canvas');
