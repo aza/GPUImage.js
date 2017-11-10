@@ -3,6 +3,7 @@
     <head>
       <meta name="apple-mobile-web-app-capable" content="yes">
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/88/three.js"></script>
+
         <script type="text/javascript" src="libs/three.CopyShader.js"></script>
         <script type="text/javascript" src="libs/three.EdgeShader.js"></script>
         <script type="text/javascript" src="libs/three.FunShader.js"></script>
@@ -13,49 +14,24 @@
         <script type="text/javascript" src="libs/three.RenderPass.js"></script>
         <script type="text/javascript" src="libs/three.ShaderPass.js"></script>
         <script type="text/javascript" src="libs/SimplexNoise.js"></script>
-        <!-- <script type="text/javascript" src="libs/FilterNode.js"></script> -->
-        <!-- <script type="text/javascript" src="libs/CameraNode.js"></script> -->
+
         <script src="libs/three.FilterChain.js"></script>
 
         <script type="text/javascript">
             function init() {
-                var canvas = document.getElementById('mainCanvas');
-                var renderer = new THREE.WebGLRenderer({
-                    canvas: canvas
-                });
-                renderer.setClearColor(0x000000);
-                var tmpScene = new THREE.Scene();
+
+                var canvas = document.getElementById('mainCanvas')
+                var renderer = new THREE.WebGLRenderer({ canvas: canvas })
+                var scene = new THREE.Scene();
 
                 // camera
                 // canvas size is 400x300
                 var camera = new THREE.OrthographicCamera(-2, 2, 1.5, -1.5, 1, 10);
                 camera.position.set(0, 0, 5);
-                tmpScene.add(camera);
+                scene.add(camera);
 
-                var renderPass = new THREE.RenderPass(tmpScene, camera);
+                var filterChain = new THREE.FilterChain( renderer, scene, camera )
 
-                var edgeShader = new THREE.ShaderPass(THREE.EdgeShader);
-                var funShader = new THREE.ShaderPass(THREE.FunShader);
-                var colorInvertShader = new THREE.ShaderPass(THREE.ColorInvertShader);
-                var zoomBlurShader = new THREE.ShaderPass(THREE.ZoomBlurShader);
-                var noiseShader = new THREE.ShaderPass(NoiseShader);
-
-                var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
-                effectCopy.renderToScreen = true;
-
-                var composer = new THREE.EffectComposer(renderer);
-
-                composer.addPass(renderPass);
-
-                // composer.addPass(edgeShader);
-                // composer.addPass(funShader);
-                // composer.addPass(colorInvertShader);
-                // composer.addPass(zoomBlurShader);
-
-                composer.addPass(effectCopy);
-                effectCopy.renderToScreen = true
-
-                var filterChain = new THREE.FilterChain( renderer, tmpScene, camera )
                 var f1 = filterChain.Filter( THREE.FunShader )
                 var f2 = filterChain.Filter( THREE.ZoomBlurShader )
                 var f3 = filterChain.Filter( THREE.ZoomBlurShader )
@@ -76,22 +52,19 @@
                 videoImage.height = canvas.height;
 
                 var videoImageContext = videoImage.getContext('2d');
-                // background color if no video present
-                videoImageContext.fillStyle = '#ff0000';
-                videoImageContext.fillRect(0, 0, videoImage.width, videoImage.height);
 
-                videoTexture = new THREE.Texture(videoImage);
-                videoTexture.minFilter = THREE.LinearFilter;
-                videoTexture.magFilter = THREE.LinearFilter;
+                videoTexture = new THREE.Texture(videoImage)
+                videoTexture.minFilter = THREE.LinearFilter
+                videoTexture.magFilter = THREE.LinearFilter
 
                 var videoMaterial = new THREE.MeshBasicMaterial({
                     map: videoTexture,
                     overdraw: true
-                });
-                var videoGeometry = new THREE.PlaneBufferGeometry(4, 3);
-                var videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
-                videoMesh.position.set(0, 0, 0);
-                tmpScene.add(videoMesh);
+                })
+                var videoGeometry = new THREE.PlaneBufferGeometry(4, 3)
+                var videoMesh = new THREE.Mesh(videoGeometry, videoMaterial)
+                videoMesh.position.set(0, 0, 0)
+                scene.add(videoMesh)
 
                 // local video
                 var video = document.getElementById('video');
@@ -104,28 +77,26 @@
 
 
                 navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
-                    video.srcObject = stream;
-                    video.onloadedmetadata = function(e) {
-                        videoImage.width = this.videoWidth;
-                        videoImage.height = this.videoHeight;
-                        video.play();
+                    video.srcObject = stream
 
-                        renderFrame();
-                    };
-                    // video.width = canvas.width;
-                    // video.height = canvas.height;
-                });
+                    video.onloadedmetadata = function(e) {
+                        videoImage.width = this.videoWidth
+                        videoImage.height = this.videoHeight
+                        video.play()
+
+                        renderFrame()
+                    }
+                })
 
 
                 function renderFrame() {
-                    videoImageContext.drawImage(video, 0, 0);
+                    videoImageContext.drawImage(video, 0, 0)
                     if (videoTexture) {
-                        videoTexture.needsUpdate = true;
+                        videoTexture.needsUpdate = true
                     }
-                    // composer.render();
-                    // cameraNode.render( renderer )
+
                     filterChain.render()
-                    requestAnimationFrame(renderFrame);
+                    requestAnimationFrame(renderFrame)
                 }
             }
         </script>
@@ -141,7 +112,7 @@
     <body onload="init()">
         <canvas id="mainCanvas" width="400px" height="300px" ></canvas>
         <video id="video" width="400px" height="300px" autoplay playsinline></video>
-        <p>You are supposed to see highlighted edges here.</p>
+
         <script>
         (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})()
 

@@ -55,7 +55,6 @@ function FilterChainNode ( parentFilterChain, shader, textureID ) {
 
 	this.enabled = true
 	this.needsSwap = true
-	this.clear = false
 
 	this.camera = new THREE.OrthographicCamera( -1, 1, 1, -1, 0, 1 )
 	this.scene  = new THREE.Scene()
@@ -84,7 +83,7 @@ FilterChainNode.prototype = {
 
     if ( this.renderToScreen ) renderer.render( this.scene, this.camera )
     else {
-      renderer.render( this.scene, this.camera, this.outputBuffer, this.clear )
+      renderer.render( this.scene, this.camera, this.outputBuffer, false ) // clear
       this.targets.forEach( target => { target.render( this.outputBuffer ) })
     }
 
