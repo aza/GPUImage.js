@@ -5,18 +5,6 @@
       <meta http-equiv="expires" content="0">
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/88/three.js"></script>
 
-        <script type="text/javascript" src="libs/three.CopyShader.js"></script>
-        <script type="text/javascript" src="libs/three.EdgeShader.js"></script>
-        <script type="text/javascript" src="libs/three.FunShader.js"></script>
-        <script type="text/javascript" src="libs/three.ColorInvertShader.js"></script>
-        <script type="text/javascript" src="libs/three.ZoomBlurShader.js"></script>
-        <script type="text/javascript" src="libs/three.EffectComposer.js"></script>
-        <script type="text/javascript" src="libs/three.MaskPass.js"></script>
-        <script type="text/javascript" src="libs/three.RenderPass.js"></script>
-        <script type="text/javascript" src="libs/three.ShaderPass.js"></script>
-        <script type="text/javascript" src="libs/SimplexNoise.js"></script>
-        <script type="text/javascript" src="libs/three.AddBlend.js"></script>
-
         <script src="libs/three.FilterDefinitions.js"></script>
 
         <script src="libs/filters/ColorInvert.js"></script>
@@ -28,6 +16,7 @@
         <script src="libs/filters/SphereRefraction.js"></script>
         <script src="libs/filters/Pixelate.js"></script>
         <script src="libs/filters/Math.js"></script>
+        <script src="libs/filters/BilateralBlur.js"></script>
 
         <script src="libs/three.FilterChain.js"></script>
 
@@ -49,18 +38,20 @@
                 var f2 = filterChain.createFilter( "ColorInvert" )
                 var f3 = filterChain.createFilter( "DifferenceBlend", {framesToDelay: 10} )
                 var f4 = filterChain.createFilter( "DifferenceBlend" )
+                var f5 = filterChain.createFilter( "BilateralBlur" )
                 //
-                filterChain.addTarget( f1 )
-                filterChain.addTarget( f2 )
+                filterChain.addTarget( f5 )
+                // filterChain.addTarget( f2 )
                 //
-                f2.addTarget( f3 )
-                f1.addTarget( f3 )
+                // f2.addTarget( f3 )
+                // f1.addTarget( f5 )
 
 
-                f3.addTarget( f4 )
-                f1.addTarget( f4 )
-
-                f4.addTarget( 'screen' )
+                // f3.addTarget( f4 )
+                // f1.addTarget( f4 )
+                //
+                // f4.addTarget( f5 )
+                f5.addTarget( 'screen' )
 
                 // video texture
                 var videoImage = document.createElement('canvas');
@@ -112,8 +103,11 @@
                     }
 
                     filterChain.render()
+                    // f5.uniforms['distanceNormalizationFactor'].value = 5.0 + 10.0 * Math.sin( Date.now()/500.0 )
+                    // console.log( f5.uniforms['distanceNormalizationFactor'].value )
 
-                    // f3.uniforms['blurSize'].value = 10.0 * Math.sin( Date.now()/500.0 )
+
+                    // f3.uniforms['blurSize'].value = (10 + 10.0 * Math.sin( Date.now()/3000.0 )
                     // f3.uniforms['blurCenter'].value = new THREE.Vector2( 0.5+Math.sin( Date.now()/100)/2.0, 0.5+Math.cos( Date.now()/100)/2.0 )
                     requestAnimationFrame(renderFrame)
                 }
