@@ -1,7 +1,7 @@
 (function(){
 
   const options = {
-    name: 'Color Invert',
+    name: 'ColorInvert',
     numberOfInputs: 1
   }
 

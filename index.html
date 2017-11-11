@@ -18,8 +18,11 @@
         <script type="text/javascript" src="libs/three.AddBlend.js"></script>
 
         <script src="libs/three.FilterDefinitions.js"></script>
+
         <script src="libs/filters/ColorInvert.js"></script>
         <script src="libs/filters/EdgeDetect.js"></script>
+        <script src="libs/filters/ZoomBlur.js"></script>
+        <script src="libs/filters/Blends.js"></script>
 
         <script src="libs/three.FilterChain.js"></script>
 
@@ -37,25 +40,19 @@
                 scene.add(camera);
 
                 var filterChain = new THREE.FilterChain( renderer, scene, camera )
-                var f1 = filterChain.createFilter( "Edge Detect" )
-                var f2 = filterChain.createFilter( "Color Invert" )
-
-                // var f1 = filterChain.filter( "fun", THREE.FunShader, 1 )
-                // var f2 = filterChain.filter( "edge", THREE.EdgeShader, 1 )
-                // var f3 = filterChain.filter( "add", THREE.MultiplyBlend, 2 )
+                var f1 = filterChain.createFilter( "EdgeDetect" )
+                var f2 = filterChain.createFilter( "ColorInvert" )
+                var f3 = filterChain.createFilter( "ZoomBlur" )
+                var f4 = filterChain.createFilter( "DivideBlend" )
 
                 filterChain.addTarget( f1 )
-                f1.addTarget( f2 )
-                f2.addTarget( 'screen' )
-                // f1.addTarget( f2 )
-                //
+                filterChain.addTarget( f4 )
+
+                f1.addTarget( f3 )
                 // f2.addTarget( f3 )
-                // f1.addTarget( f3 )
-                //
-                // f3.addTarget( 'screen' )
-                // console.log('um')
-                //
-                // console.log( FilterLibrary.get('Color Invert'), "hello" )
+                f3.addTarget( f4 )
+
+                f4.addTarget( 'screen' )
 
                 // video texture
                 var videoImage = document.createElement('canvas');
@@ -107,6 +104,8 @@
                     }
 
                     filterChain.render()
+                    // f3.uniforms['blurSize'].value = 10.0 * Math.sin( Date.now()/500.0 )
+                    // f3.uniforms['blurCenter'].value = new THREE.Vector2( 0.5+Math.sin( Date.now()/100)/2.0, 0.5+Math.cos( Date.now()/100)/2.0 )
                     requestAnimationFrame(renderFrame)
                 }
             }

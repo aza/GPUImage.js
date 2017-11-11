@@ -1,7 +1,7 @@
 (function(){
 
   const options = {
-    name: 'Edge Detect',
+    name: 'EdgeDetect',
     numberOfInputs: 1
   }
 
@@ -9,7 +9,7 @@
     name: options.name,
     numberOfInputs: options.numberOfInputs,
     uniforms: FilterDefinitions._baseUniforms( options.numberOfInputs, {
-      "aspect":    { type: "v2", value: new THREE.Vector2( 512, 512 ) }
+      "aspect": { type: "v2", value: new THREE.Vector2( 512, 512 ) }
     }),
     vertexShader: FilterDefinitions._baseVertexShader(),
     fragmentShader: [
