@@ -34,7 +34,7 @@
 
   createBlend("AddBlend", "color1 + color2")
   createBlend("SubtractBlend", "color1 - color2")
-  createBlend("AbsSubtractBlend", "abs(color1 - color2)")
+  createBlend("DifferenceBlend", "abs(color1 - color2)")
   createBlend("MultiplyBlend", "color1 * color2")
   createBlend("DivideBlend", "color1 / color2")
   createBlend("SqrtBlend", "sqrt(color1*color1 + color2*color2)")

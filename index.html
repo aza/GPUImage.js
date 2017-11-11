@@ -27,6 +27,7 @@
         <script src="libs/filters/Swirl.js"></script>
         <script src="libs/filters/SphereRefraction.js"></script>
         <script src="libs/filters/Pixelate.js"></script>
+        <script src="libs/filters/Math.js"></script>
 
         <script src="libs/three.FilterChain.js"></script>
 
@@ -44,19 +45,22 @@
                 scene.add(camera);
 
                 var filterChain = new THREE.FilterChain( renderer, scene, camera )
-                var f1 = filterChain.createFilter( "Pixelate", {framesToDelay: 0, fractionalWidthOfPixel: 0.05} )
+                var f1 = filterChain.createFilter( "Mod")
                 var f2 = filterChain.createFilter( "ColorInvert" )
-                var f3 = filterChain.createFilter( "ModBlend" )
-                // var f4 = filterChain.createFilter( "SubtractBlend" )
+                var f3 = filterChain.createFilter( "DifferenceBlend", {framesToDelay: 10} )
+                var f4 = filterChain.createFilter( "DifferenceBlend" )
                 //
                 filterChain.addTarget( f1 )
                 filterChain.addTarget( f2 )
-
+                //
                 f2.addTarget( f3 )
                 f1.addTarget( f3 )
 
 
-                f3.addTarget( "screen" )
+                f3.addTarget( f4 )
+                f1.addTarget( f4 )
+
+                f4.addTarget( 'screen' )
 
                 // video texture
                 var videoImage = document.createElement('canvas');
