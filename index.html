@@ -42,6 +42,8 @@
                 var f4 = filterChain.createFilter( "DifferenceBlend" )
                 var f5 = filterChain.createFilter( "SobelEdgeDetection" )
                 var f3 = filterChain.createFilter( "Glitch" )
+                var mixer = filterChain.createFilter( "MixByThird" )
+                var delay = filterChain.createFilter( "Delay", {framesToDelay: 5})
                 //
                 filterChain.addTarget( f5 )
                 f5.uniforms.edgeStrength.update = () => 7.0 + 4*Math.sin(Date.now()/1000)
@@ -53,7 +55,12 @@
                 f4.addTarget( f2 )
 
                 f2.addTarget( f3 )
-                f3.addTarget( 'screen' )
+
+                f3.addTarget( mixer )
+                f3.addTarget( delay )
+                delay.addTarget( mixer )
+                f3.addTarget( mixer )
+                mixer.addTarget( 'screen' )
 
                 // video texture
                 var videoImage = document.createElement('canvas');

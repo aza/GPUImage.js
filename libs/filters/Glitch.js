@@ -13,7 +13,6 @@
       resolution: {value: new THREE.Vector2(800, 600)},
       glitchInterval: {value: 4},
       glitchRate: {value: 0.9}
-
     }),
     vertexShader: FilterDefinitions._baseVertexShader(),
     fragmentShader: `
