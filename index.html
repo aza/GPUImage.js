@@ -40,19 +40,22 @@
                 scene.add(camera);
 
                 var filterChain = new THREE.FilterChain( renderer, scene, camera )
-                var f1 = filterChain.createFilter( "EdgeDetect" )
-                // var f2 = filterChain.createFilter( "ColorInvert" )
-                // var f3 = filterChain.createFilter( "ZoomBlur" )
-                var f4 = filterChain.createFilter( "MultiplyBlend" )
+                var f1 = filterChain.createFilter( "EdgeDetect", {framesToDelay: 30} )
+                var f2 = filterChain.createFilter( "ColorInvert", {framesToDelay: 60} )
+                var f3 = filterChain.createFilter( "AddBlend" )
+                var f4 = filterChain.createFilter( "SubtractBlend" )
 
                 filterChain.addTarget( f1 )
                 filterChain.addTarget( f4 )
+                filterChain.addTarget( f2 )
 
                 f1.addTarget( f4 )
+                f2.addTarget( f3 )
+                f4.addTarget( f3 )
                 // f2.addTarget( f3 )
                 // f3.addTarget( f4 )
 
-                f4.addTarget( 'screen' )
+                f3.addTarget( 'screen' )
 
                 // video texture
                 var videoImage = document.createElement('canvas');

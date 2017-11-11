@@ -25,6 +25,7 @@ FilterDefinitionsSingleton.prototype = {
   },
 
   add: function( shaderInfo ){
+    shaderInfo.framesToDelay = shaderInfo.framesToDelay || 0
     this.filters[ shaderInfo.name ] = shaderInfo
   },
 

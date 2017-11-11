@@ -36,8 +36,12 @@ THREE.FilterChain.prototype = {
     return new FilterChainNode( this, name, shader, numInputs )
   },
 
-  createFilter: function( name ) {
+  createFilter: function( name, options ) {
+    options = options || {}
     var filterDef = FilterDefinitions.get(name)
+
+    Object.keys( options ).forEach( key => { filterDef[key] = options[key] })
+
     return new FilterChainNode( this, filterDef )
   }
 
@@ -73,12 +77,13 @@ function FilterChainNode ( parentFilterChain, filterDef ) {
 	this.scene.add( this.quad )
 
   this.parentFilterChain = parentFilterChain
-  this.outputBuffer = parentFilterChain.createBuffer()
+  this.outputBuffers = []
 
-  this.delay = filterDef.delay
-  if( filterDef.delay ) {
-    this.outputBuffers = [parentFilterChain.createBuffer(), parentFilterChain.createBuffer(), parentFilterChain.createBuffer(), parentFilterChain.createBuffer(), parentFilterChain.createBuffer(), parentFilterChain.createBuffer(), parentFilterChain.createBuffer(), parentFilterChain.createBuffer()]
-    this.counter = 0
+  this.framesToDelay = filterDef.framesToDelay
+  this.frameCount = 0
+
+  for( var i=0; i<=this.framesToDelay; i++){
+    this.outputBuffers.push( parentFilterChain.createBuffer() )
   }
 
   this.targets = []
@@ -106,21 +111,12 @@ FilterChainNode.prototype = {
 
     const renderer = this.parentFilterChain.renderer
 
-    if ( this.renderToScreen ) renderer.render( this.scene, this.camera )
+    if ( this.renderToScreen )
+      renderer.render( this.scene, this.camera )
     else {
-
-
-      if( this.delay ){
-
-        renderer.render( this.scene, this.camera, this.outputBuffers[this.counter % this.outputBuffers.length], false ) // clear
-        this.targets.forEach( target => { target.render( this.outputBuffers[(this.counter-5) % this.outputBuffers.length] ) })
-        this.counter++
-      }
-      else {
-        renderer.render( this.scene, this.camera, this.outputBuffer, false ) // clear
-        this.targets.forEach( target => { target.render( this.outputBuffer ) })
-      }
-
+      renderer.render( this.scene, this.camera, this.outputBuffers[this.frameCount % this.outputBuffers.length], false ) // clear
+      this.targets.forEach( target => { target.render( this.outputBuffers[(this.frameCount-(this.framesToDelay-1)) % this.outputBuffers.length] ) })
+      this.frameCount += 1
     }
 
   },
