@@ -40,7 +40,19 @@ THREE.FilterChain.prototype = {
     options = options || {}
     var filterDef = FilterDefinitions.get(name)
 
-    Object.keys( options ).forEach( key => { filterDef[key] = options[key] })
+    Object.keys( options ).forEach( key => {
+
+      // Set the extant uniform values if passing in a uniform name/value
+      if( filterDef.uniforms[key] ) {
+        filterDef.uniforms[key].value = options[key]
+      }
+
+      // Else it is a new global def (like framesToDelay)
+      else {
+        filterDef[key] = options[key]
+      }
+
+    })
 
     return new FilterChainNode( this, filterDef )
   }

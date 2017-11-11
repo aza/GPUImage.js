@@ -34,9 +34,11 @@
 
   createBlend("AddBlend", "color1 + color2")
   createBlend("SubtractBlend", "color1 - color2")
+  createBlend("AbsSubtractBlend", "abs(color1 - color2)")
   createBlend("MultiplyBlend", "color1 * color2")
   createBlend("DivideBlend", "color1 / color2")
   createBlend("SqrtBlend", "sqrt(color1*color1 + color2*color2)")
   createBlend("AverageBlend", "(color1 + color2)/2.0")
+  createBlend("ModBlend", "mod(50000.0*(color1 / color2), 5000.0)/5000.0")
 
 })()

@@ -26,6 +26,7 @@
         <script src="libs/filters/Delay.js"></script>
         <script src="libs/filters/Swirl.js"></script>
         <script src="libs/filters/SphereRefraction.js"></script>
+        <script src="libs/filters/Pixelate.js"></script>
 
         <script src="libs/three.FilterChain.js"></script>
 
@@ -43,20 +44,19 @@
                 scene.add(camera);
 
                 var filterChain = new THREE.FilterChain( renderer, scene, camera )
-                var f1 = filterChain.createFilter( "SphereRefraction" )
-                // var f2 = filterChain.createFilter( "ColorInvert", {framesToDelay: 60} )
-                // var f3 = filterChain.createFilter( "AddBlend" )
+                var f1 = filterChain.createFilter( "Pixelate", {framesToDelay: 0, fractionalWidthOfPixel: 0.05} )
+                var f2 = filterChain.createFilter( "ColorInvert" )
+                var f3 = filterChain.createFilter( "ModBlend" )
                 // var f4 = filterChain.createFilter( "SubtractBlend" )
                 //
                 filterChain.addTarget( f1 )
-                // filterChain.addTarget( f4 )
-                // filterChain.addTarget( f2 )
-                //
-                // f1.addTarget( f4 )
-                // f2.addTarget( f3 )
-                // f4.addTarget( f3 )
+                filterChain.addTarget( f2 )
 
-                f1.addTarget( "screen" )
+                f2.addTarget( f3 )
+                f1.addTarget( f3 )
+
+
+                f3.addTarget( "screen" )
 
                 // video texture
                 var videoImage = document.createElement('canvas');
@@ -108,6 +108,7 @@
                     }
 
                     filterChain.render()
+
                     // f3.uniforms['blurSize'].value = 10.0 * Math.sin( Date.now()/500.0 )
                     // f3.uniforms['blurCenter'].value = new THREE.Vector2( 0.5+Math.sin( Date.now()/100)/2.0, 0.5+Math.cos( Date.now()/100)/2.0 )
                     requestAnimationFrame(renderFrame)
