@@ -23,6 +23,7 @@
         <script src="libs/filters/EdgeDetect.js"></script>
         <script src="libs/filters/ZoomBlur.js"></script>
         <script src="libs/filters/Blends.js"></script>
+        <script src="libs/filters/Delay.js"></script>
 
         <script src="libs/three.FilterChain.js"></script>
 
@@ -52,10 +53,8 @@
                 f1.addTarget( f4 )
                 f2.addTarget( f3 )
                 f4.addTarget( f3 )
-                // f2.addTarget( f3 )
-                // f3.addTarget( f4 )
 
-                f3.addTarget( 'screen' )
+                f3.addTarget( "screen" )
 
                 // video texture
                 var videoImage = document.createElement('canvas');

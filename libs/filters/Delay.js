@@ -1,8 +1,9 @@
 (function(){
 
   const options = {
-    name: 'ColorInvert',
-    numberOfInputs: 1
+    name: 'Delay',
+    numberOfInputs: 1,
+    framesToDelay: 5
   }
 
   var shader = {
@@ -15,8 +16,7 @@
   		"varying vec2 inputCoord;",
   		"void main(void)",
   		"{",
-  			"vec4 sample = texture2D(input0, inputCoord );",
-  			"gl_FragColor = vec4((1.0 - sample.rbg), sample.w);",
+  			"gl_FragColor = texture2D(input0, inputCoord );",
   		"}",
   	].join("\n")
   }
