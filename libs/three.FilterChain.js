@@ -117,6 +117,11 @@ FilterChainNode.prototype = {
       this.uniforms[id].value = this._receivedInputs[i]
     }
 
+    for( uniformName in this.uniforms ){
+      let uniform = this.uniforms[uniformName]
+      if( uniform.update ) uniform.value = uniform.update( uniform.value )
+    }
+
     this._receivedInputs = []
 
     this.quad.material = this.material
