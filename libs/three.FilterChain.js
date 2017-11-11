@@ -75,6 +75,12 @@ function FilterChainNode ( parentFilterChain, filterDef ) {
   this.parentFilterChain = parentFilterChain
   this.outputBuffer = parentFilterChain.createBuffer()
 
+  this.delay = filterDef.delay
+  if( filterDef.delay ) {
+    this.outputBuffers = [parentFilterChain.createBuffer(), parentFilterChain.createBuffer(), parentFilterChain.createBuffer(), parentFilterChain.createBuffer(), parentFilterChain.createBuffer(), parentFilterChain.createBuffer(), parentFilterChain.createBuffer(), parentFilterChain.createBuffer()]
+    this.counter = 0
+  }
+
   this.targets = []
 
 }
@@ -102,8 +108,19 @@ FilterChainNode.prototype = {
 
     if ( this.renderToScreen ) renderer.render( this.scene, this.camera )
     else {
-      renderer.render( this.scene, this.camera, this.outputBuffer, false ) // clear
-      this.targets.forEach( target => { target.render( this.outputBuffer ) })
+
+
+      if( this.delay ){
+
+        renderer.render( this.scene, this.camera, this.outputBuffers[this.counter % this.outputBuffers.length], false ) // clear
+        this.targets.forEach( target => { target.render( this.outputBuffers[(this.counter-5) % this.outputBuffers.length] ) })
+        this.counter++
+      }
+      else {
+        renderer.render( this.scene, this.camera, this.outputBuffer, false ) // clear
+        this.targets.forEach( target => { target.render( this.outputBuffer ) })
+      }
+
     }
 
   },

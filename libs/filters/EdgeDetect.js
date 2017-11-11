@@ -7,6 +7,7 @@
 
   var shader = {
     name: options.name,
+    delay: 1,
     numberOfInputs: options.numberOfInputs,
     uniforms: FilterDefinitions._baseUniforms( options.numberOfInputs, {
       "aspect": { type: "v2", value: new THREE.Vector2( 512, 512 ) }

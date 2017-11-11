@@ -41,16 +41,16 @@
 
                 var filterChain = new THREE.FilterChain( renderer, scene, camera )
                 var f1 = filterChain.createFilter( "EdgeDetect" )
-                var f2 = filterChain.createFilter( "ColorInvert" )
-                var f3 = filterChain.createFilter( "ZoomBlur" )
-                var f4 = filterChain.createFilter( "DivideBlend" )
+                // var f2 = filterChain.createFilter( "ColorInvert" )
+                // var f3 = filterChain.createFilter( "ZoomBlur" )
+                var f4 = filterChain.createFilter( "MultiplyBlend" )
 
                 filterChain.addTarget( f1 )
                 filterChain.addTarget( f4 )
 
-                f1.addTarget( f3 )
+                f1.addTarget( f4 )
                 // f2.addTarget( f3 )
-                f3.addTarget( f4 )
+                // f3.addTarget( f4 )
 
                 f4.addTarget( 'screen' )
 
