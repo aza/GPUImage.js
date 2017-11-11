@@ -25,6 +25,7 @@
         <script src="libs/filters/Blends.js"></script>
         <script src="libs/filters/Delay.js"></script>
         <script src="libs/filters/Swirl.js"></script>
+        <script src="libs/filters/SphereRefraction.js"></script>
 
         <script src="libs/three.FilterChain.js"></script>
 
@@ -42,7 +43,7 @@
                 scene.add(camera);
 
                 var filterChain = new THREE.FilterChain( renderer, scene, camera )
-                var f1 = filterChain.createFilter( "Swirl" )
+                var f1 = filterChain.createFilter( "SphereRefraction" )
                 // var f2 = filterChain.createFilter( "ColorInvert", {framesToDelay: 60} )
                 // var f3 = filterChain.createFilter( "AddBlend" )
                 // var f4 = filterChain.createFilter( "SubtractBlend" )
