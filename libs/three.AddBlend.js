@@ -7,10 +7,8 @@
 THREE.AddBlend = {
 
 	uniforms: {
-
 		"tDiffuse1": { type: "t", value: null },
     "tDiffuse2": { type: "t", value: null }
-
 	},
 
 	vertexShader: [

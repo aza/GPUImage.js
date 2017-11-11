@@ -34,26 +34,31 @@ THREE.FilterChain.prototype = {
 
   filter: function( name, shader, numInputs ) {
     return new FilterChainNode( this, name, shader, numInputs )
+  },
+
+  createFilter: function( name ) {
+    var filterDef = FilterDefinitions.get(name)
+    return new FilterChainNode( this, filterDef )
   }
 
 }
 
-function FilterChainNode ( parentFilterChain, name, shader, numInputs ) {
+function FilterChainNode ( parentFilterChain, filterDef ) {
 
-  this.name = name
+  this.name = filterDef.name
 
-  this.numInputs = numInputs == null ? 1 : numInputs
+  this.numInputs = filterDef.numberOfInputs
   this._receivedInputs = []
 
-  this.textureID = "tDiffuse"
+  this.textureID = "input"
 
-	this.uniforms = THREE.UniformsUtils.clone( shader.uniforms )
+	this.uniforms = THREE.UniformsUtils.clone( filterDef.uniforms )
 
 	this.material = new THREE.ShaderMaterial({
-    defines: shader.defines || {},
+    defines: filterDef.defines || {},
 		uniforms: this.uniforms,
-		vertexShader: shader.vertexShader,
-		fragmentShader: shader.fragmentShader
+		vertexShader: filterDef.vertexShader,
+		fragmentShader: filterDef.fragmentShader
 	})
 
 	this.renderToScreen = false
@@ -84,7 +89,8 @@ FilterChainNode.prototype = {
     if( this._receivedInputs.length < this.numInputs ) return
 
     for( var i=0; i<this.numInputs; i++){
-      var id = this.textureID + (i+1)
+      var id = this.textureID + i
+      if( !this.uniforms[id] ){ console.log( "ERROR", this.name, this.uniforms, this.uniforms[id] )}
       this.uniforms[id].value = this._receivedInputs[i]
     }
 
