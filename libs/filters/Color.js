@@ -2,8 +2,7 @@
 
   const options = {
     name: 'RotateColor',
-    numberOfInputs: 1,
-    framesToDelay: 5
+    numberOfInputs: 1  
   }
 
   var shader = {

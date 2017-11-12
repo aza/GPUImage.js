@@ -69,7 +69,7 @@
             vec4 color2 = texture2D(input1, inputCoord);
             vec4 color3 = texture2D(input2, inputCoord);
 
-    		    gl_FragColor = vec4(${expression},1.0);
+    		    gl_FragColor = ${expression};
     		}
     	`
     }
@@ -77,7 +77,9 @@
     FilterDefinitions.add(shader)
   }
 
-  createBlend("MixByThird", "mix(color1.rgb, color2.rgb, dot(color3.rgb, W))")
+  createBlend("MixByThirdLuminance", "mix( color1, color2, dot(color3.rgb, W))")
+  createBlend("MixByThirdColor", "mix( color1, color2, color3)")
+  createBlend("ShowLuminance", "vec3(dot(color3.rgb, W), dot(color3.rgb, W), dot(color3.rgb, W))")
   // createBlend("MixByThird", "vec3(color1.r, color2.g, color3.b) ")
 
 
