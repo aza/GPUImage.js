@@ -38,14 +38,21 @@
                 camera.position.set(0, 0, 5);
                 scene.add(camera);
 
-
-
                 var trippy = new THREE.Trippy( renderer, scene, camera )
-                var a = trippy.createFilter( "Grow" )
+                var a = trippy.createFilter( "Hue" )
+                var aa = trippy.createFilter( "Grow", {a: 0.07} )
+                var b = trippy.createFilter( "Mod" )
+                var c = trippy.createFilter( "Hue" )
 
+                a.uniforms.hueAdjust.update = (x) => x+.01309
+                c.uniforms.hueAdjust.update = (x) => x-.04
+                // aa.uniforms.a = 0.001
 
                 trippy.addTarget( a )
-                a.addTarget( "screen" )
+                a.addTarget(aa)
+                aa.addTarget(b)
+                b.addTarget(c)
+                c.addTarget( "screen" )
 
 
 
@@ -109,11 +116,11 @@
             }
         </script>
         <style>
-          /*canvas{
+          canvas{
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 100%;
-          }*/
+          }
         </style>
     </head>
 
