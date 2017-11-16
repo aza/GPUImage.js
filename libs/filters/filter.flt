@@ -1,0 +1,8 @@
+<def-filter name="FlipGlitchLine">
+  <input target="#edge, #color">
+  <filter id="edge" name="SobelEdgeDetection" target="#blend" update="this.uniforms.edgeStrength.value = 3 + 3*Math.sin( Date.now()/1e3 )">
+  <filter id="color" name="RotateColor" target="#sphere">
+  <filter id="sphere" name="SphereRefraction" radius="1.2" target="glitch">
+  <filter id="glitch" name="Glitch" target="#blend">
+  <filter id="blend" name="DifferenceBlend" target="output">
+</def-filter>

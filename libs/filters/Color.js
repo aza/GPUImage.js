@@ -2,7 +2,7 @@
 
   const options = {
     name: 'RotateColor',
-    numberOfInputs: 1  
+    numberOfInputs: 1
   }
 
   var shader = {
@@ -28,4 +28,4 @@
 
   FilterDefinitions.add(shader)
 
-})()
+})();

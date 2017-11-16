@@ -17,6 +17,35 @@
 
     		varying vec2 inputCoord;
 
+        /// COSH Function (Hyperbolic Cosine)
+        float cosh(float val)
+        {
+            float tmp = exp(val);
+            float cosH = (tmp + 1.0 / tmp) / 2.0;
+            return cosH;
+        }
+
+        // TANH Function (Hyperbolic Tangent)
+        float tanh(float val)
+        {
+            float tmp = exp(val);
+            float tanH = (tmp - 1.0 / tmp) / (tmp + 1.0 / tmp);
+            return tanH;
+        }
+
+        vec4 tanh(vec4 val)
+        {
+          return vec4( tanh(val.r), tanh(val.g), tanh(val.b), tanh(val.w));
+        }
+
+        // SINH Function (Hyperbolic Sine)
+        float sinh(float val)
+        {
+            float tmp = exp(val);
+            float sinH = (tmp - 1.0 / tmp) / 2.0;
+            return sinH;
+        }
+
     		void main(void)
     		{
     		    vec4 color1 = texture2D(input0, inputCoord);
@@ -34,9 +63,11 @@
   createBlend("DifferenceBlend", "abs(color1 - color2)")
   createBlend("MultiplyBlend", "color1 * color2")
   createBlend("DivideBlend", "color1 / color2")
-  createBlend("SqrtBlend", "sqrt(color1*color1 + color2*color2)")
+  createBlend("SqrtBlend", "sqrt(color1*color1 + color2*color2)/2.0")
   createBlend("AverageBlend", "(color1 + color2)/2.0")
   createBlend("ModBlend", "mod(50000.0*(color1 / color2), 5000.0)/5000.0")
+  createBlend("FunBlend", "abs(2.0*color1 - color2)/2.0"),
+  createBlend("FunBlend2", "abs(tanh(1.8*(color1 - color2)))")
 
 })();
 

@@ -1,4 +1,4 @@
-THREE.FilterChain = function( renderer, scene, camera ){
+THREE.Trippy = function( renderer, scene, camera ){
 
   this.scene = scene
   this.camera = camera
@@ -20,7 +20,7 @@ THREE.FilterChain = function( renderer, scene, camera ){
 
 }
 
-THREE.FilterChain.prototype = {
+THREE.Trippy.prototype = {
 
   render: function() {
     // last arg is clear:bool
@@ -33,7 +33,7 @@ THREE.FilterChain.prototype = {
   },
 
   filter: function( name, shader, numInputs ) {
-    return new FilterChainNode( this, name, shader, numInputs )
+    return new TrippyNode( this, name, shader, numInputs )
   },
 
   createFilter: function( name, options ) {
@@ -54,12 +54,12 @@ THREE.FilterChain.prototype = {
 
     })
 
-    return new FilterChainNode( this, filterDef )
+    return new TrippyNode( this, filterDef )
   }
 
 }
 
-function FilterChainNode ( parentFilterChain, filterDef ) {
+function TrippyNode ( parentFilterChain, filterDef ) {
 
   this.name = filterDef.name
 
@@ -102,7 +102,7 @@ function FilterChainNode ( parentFilterChain, filterDef ) {
 
 }
 
-FilterChainNode.prototype = {
+TrippyNode.prototype = {
 
   render: function( buffer ) {
 
@@ -131,6 +131,7 @@ FilterChainNode.prototype = {
     if ( this.renderToScreen )
       renderer.render( this.scene, this.camera )
     else {
+
       renderer.render( this.scene, this.camera, this.outputBuffers[this.frameCount % this.outputBuffers.length], false ) // clear
       this.targets.forEach( target => { target.render( this.outputBuffers[(this.frameCount-(this.framesToDelay-1)) % this.outputBuffers.length] ) })
       this.frameCount += 1
@@ -138,7 +139,7 @@ FilterChainNode.prototype = {
 
   },
 
-  addTarget: function( target ) {
+  addTarget: function( target, options ) {
     if( target == "screen" ) this.renderToScreen = true
     this.targets.push( target )
   }
