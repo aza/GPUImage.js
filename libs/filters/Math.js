@@ -75,3 +75,40 @@
   FilterDefinitions.add(shader)
 
 })();
+
+
+(function(){
+
+  const options = {
+    name: "Double",
+    numberOfInputs: 1
+  }
+
+  var shader = {
+    name: options.name,
+    numberOfInputs: options.numberOfInputs,
+    uniforms: FilterDefinitions._baseUniforms( options.numberOfInputs, {
+      a: {type: 'float', value: 0.01}
+    }),
+    vertexShader: FilterDefinitions._baseVertexShader(),
+    fragmentShader: `
+
+      uniform float a;
+  		uniform sampler2D input0;
+  		varying vec2 inputCoord;
+
+  		void main(void)
+  		{
+  		    vec4 color = texture2D(input0, inputCoord * vec2( 2.0, 1.0) );
+          if( inputCoord.x > 0.5 ){
+            color = texture2D(input0, inputCoord * vec2( 2.0, 1.0) - vec2(1.0, 0.0) );
+          }
+
+  		    gl_FragColor = color;
+  		}
+      `
+  }
+
+  FilterDefinitions.add(shader)
+
+})();

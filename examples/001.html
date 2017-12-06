@@ -1,0 +1,141 @@
+
+<html>
+    <head>
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta http-equiv="expires" content="0">
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/88/three.js"></script>
+
+        <script src="../libs/three.FilterDefinitions.js"></script>
+
+        <script src="../libs/filters/ColorInvert.js"></script>
+        <script src="../libs/filters/EdgeDetect.js"></script>
+        <script src="../libs/filters/ZoomBlur.js"></script>
+        <script src="../libs/filters/Blends.js"></script>
+        <script src="../libs/filters/Delay.js"></script>
+        <script src="../libs/filters/Swirl.js"></script>
+        <script src="../libs/filters/SphereRefraction.js"></script>
+        <script src="../libs/filters/Pixelate.js"></script>
+        <script src="../libs/filters/Math.js"></script>
+        <script src="../libs/filters/BilateralBlur.js"></script>
+        <script src="../libs/filters/Color.js"></script>
+        <script src="../libs/filters/SobelEdgeDetection.js"></script>
+        <script src="../libs/filters/Glitch.js"></script>
+        <script src="../libs/filters/Pattern.js"></script>
+        <script src="../libs/filters/Noise.js"></script>
+
+        <script src="../libs/three.FilterChain.js"></script>
+
+        <script type="text/javascript">
+            function init() {
+
+                var canvas = document.getElementById('mainCanvas')
+                var renderer = new THREE.WebGLRenderer({ canvas: canvas })
+                var scene = new THREE.Scene();
+
+                // camera
+                // canvas size is 400x300
+                var camera = new THREE.OrthographicCamera(-2, 2, 1.5, -1.5, 1, 10);
+                camera.position.set(0, 0, 5);
+                scene.add(camera);
+
+                  var filterChain = new THREE.Trippy( renderer, scene, camera )
+                  var edge = filterChain.createFilter( "SobelEdgeDetection", {edgeStrength: 3} )
+                  var mixer = filterChain.createFilter( "MixByThirdColor" )
+                  var colorize = filterChain.createFilter( "RotateColor")
+                  var mod = filterChain.createFilter( "Mod")
+                  var noise = filterChain.createFilter( "Noise", {scale: 8, contrast: 0.7})
+                  var mult = filterChain.createFilter( "DivideBlend")
+
+                  filterChain.addTarget( edge )
+                  edge.addTarget( colorize )
+                  colorize.addTarget( mixer )
+
+                  filterChain.addTarget( mod )
+                  mod.addTarget( mixer )
+
+                  noise.uniforms.speed.update = () => { return 1.5 + 0.5+Math.sin(Date.now()/5000.0) }
+                  noise.uniforms.contrast.update = () => { return 3 + 3+Math.sin(Date.now()/1000.0) }
+
+                  noise.addTarget( mult )
+                  filterChain.addTarget( mult )
+
+                  mult.addTarget( mixer )
+                  filterChain.addTarget( noise )
+
+
+                  mixer.addTarget( 'screen' )
+
+
+                // video texture
+                var videoImage = document.createElement('canvas');
+                videoImage.width = canvas.width;
+                videoImage.height = canvas.height;
+
+                var videoImageContext = videoImage.getContext('2d');
+
+                videoTexture = new THREE.Texture(videoImage)
+                videoTexture.minFilter = THREE.LinearFilter
+                videoTexture.magFilter = THREE.LinearFilter
+
+                var videoMaterial = new THREE.MeshBasicMaterial({
+                    map: videoTexture,
+                    overdraw: true
+                })
+                var videoGeometry = new THREE.PlaneBufferGeometry(4, 3)
+                var videoMesh = new THREE.Mesh(videoGeometry, videoMaterial)
+                videoMesh.position.set(0, 0, 0)
+                scene.add(videoMesh)
+
+                // local video
+                var video = document.getElementById('video');
+
+                var facingMode = "user";
+                var constraints = {
+                  audio: false,
+                  video: { facingMode: "environment"  }
+                }
+
+
+                navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+                    video.srcObject = stream
+
+                    video.onloadedmetadata = function(e) {
+                        videoImage.width = this.videoWidth
+                        videoImage.height = this.videoHeight
+                        video.play()
+
+                        renderFrame()
+                    }
+                })
+
+                function renderFrame() {
+                    videoImageContext.drawImage(video, 0, 0)
+                    if (videoTexture) {
+                        videoTexture.needsUpdate = true
+                    }
+
+                    filterChain.render()
+                    requestAnimationFrame(renderFrame)
+                }
+            }
+        </script>
+        <style>
+          canvas{
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+          }
+          body{ background-color: black;}
+        </style>
+    </head>
+
+    <body onload="init()">
+        <canvas id="mainCanvas" width="1800px" height="1350px" ></canvas>
+        <video style="display:none;" id="video" width="1800px" height="1350px" autoplay playsinline></video>
+
+        <!-- <script>
+        (function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='//rawgit.com/mrdoob/stats.js/master/build/stats.min.js';document.head.appendChild(script);})()
+
+        </script> -->
+    </body>
+</html>
