@@ -68,6 +68,9 @@
   createBlend("ModBlend", "mod(50000.0*(color1 / color2), 5000.0)/5000.0")
   createBlend("FunBlend", "abs(2.0*color1 - color2)/2.0"),
   createBlend("FunBlend2", "abs(tanh(1.8*(color1 - color2)))")
+  createBlend("MaxBlend", "max(color1, color2)")
+  createBlend("MinBlend", "min(color1, color2)")
+  createBlend("ChromaKeyBlend", "mix(color1, color2, (color1.g+color1.r+color1.b)*color1.g == 1.0 ? 1.0 : 0.0 )")
 
 })();
 

@@ -5,25 +5,26 @@
       <meta http-equiv="expires" content="0">
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/88/three.js"></script>
 
-        <script src="libs/three.FilterDefinitions.js"></script>
+        <script src="../libs/three.FilterDefinitions.js"></script>
 
-        <script src="libs/filters/ColorInvert.js"></script>
-        <script src="libs/filters/EdgeDetect.js"></script>
-        <script src="libs/filters/ZoomBlur.js"></script>
-        <script src="libs/filters/Blends.js"></script>
-        <script src="libs/filters/Delay.js"></script>
-        <script src="libs/filters/Swirl.js"></script>
-        <script src="libs/filters/SphereRefraction.js"></script>
-        <script src="libs/filters/Pixelate.js"></script>
-        <script src="libs/filters/Math.js"></script>
-        <script src="libs/filters/BilateralBlur.js"></script>
-        <script src="libs/filters/Color.js"></script>
-        <script src="libs/filters/SobelEdgeDetection.js"></script>
-        <script src="libs/filters/Glitch.js"></script>
-        <script src="libs/filters/Pattern.js"></script>
-        <script src="libs/filters/Noise.js"></script>
+        <script src="../libs/filters/ColorInvert.js"></script>
+        <script src="../libs/filters/EdgeDetect.js"></script>
+        <script src="../libs/filters/ZoomBlur.js"></script>
+        <script src="../libs/filters/Blends.js"></script>
+        <script src="../libs/filters/Delay.js"></script>
+        <script src="../libs/filters/Swirl.js"></script>
+        <script src="../libs/filters/SphereRefraction.js"></script>
+        <script src="../libs/filters/Pixelate.js"></script>
+        <script src="../libs/filters/Math.js"></script>
+        <script src="../libs/filters/BilateralBlur.js"></script>
+        <script src="../libs/filters/Color.js"></script>
+        <script src="../libs/filters/SobelEdgeDetection.js"></script>
+        <script src="../libs/filters/Glitch.js"></script>
+        <script src="../libs/filters/Pattern.js"></script>
+        <script src="../libs/filters/Noise.js"></script>
+        <script src="../libs/filters/Transform.js"></script>
 
-        <script src="libs/three.FilterChain.js"></script>
+        <script src="../libs/three.FilterChain.js"></script>
 
         <script type="text/javascript">
             function init() {
@@ -37,29 +38,24 @@
                 var camera = new THREE.OrthographicCamera(-2, 2, 1.5, -1.5, 1, 10);
                 camera.position.set(0, 0, 5);
                 scene.add(camera);
-                //
-                // var trippy = new THREE.Trippy( renderer, scene, camera )
-                // var a = trippy.createFilter( "Hue" )
-                // // var aa = trippy.createFilter( "Grow", {a: 0.07} )
-                // var b = trippy.createFilter( "Mod" )
-                // var c = trippy.createFilter( "Hue" )
-                // var d = trippy.createFilter( "Double" )
-                //
-                // a.uniforms.hueAdjust.update = (x) => x+.01309
-                // c.uniforms.hueAdjust.update = (x) => x-.04
-                // // aa.uniforms.a = 0.001
-                //
-                // trippy.addTarget( a )
-                // a.addTarget(b)
-                // // aa.addTarget(b)
-                // b.addTarget(c)
-                // c.addTarget(d)
-                // d.addTarget( "screen" )
-
 
                 var trippy = new THREE.Trippy( renderer, scene, camera )
 
-                trippy.addTarget( "screen" )
+                var a = trippy.createFilter( "Transform", {scale: new THREE.Vector2(0.999,0.999), angle: 90, backgroundColor: new THREE.Vector2(0,0,0)} )
+                var mix = trippy.createFilter( "DifferenceBlend" )
+                var passthrough = trippy.createFilter( "Delay", {framesToDelay: 30} )
+                var output = trippy.createFilter( "Delay", {framesToDelay: 0} )
+
+                trippy.addTarget( mix )
+                mix.addTarget( a )
+                a.addTarget( passthrough )
+                passthrough.addTarget( mix )
+
+                passthrough.addTarget( output )
+
+                a.uniforms.angle.update = (x) => {return 90+10*Math.sin(Date.now()/5000)}
+
+                output.addTarget( "screen" )
 
 
                 // video texture
@@ -111,10 +107,6 @@
                     }
 
                     trippy.render()
-                    // f.uniforms.edgeStrength.value = 3+3*Math.sin( Date.now()/1000.0 )
-
-                    // f3.uniforms['blurSize'].value = (10 + 10.0 * Math.sin( Date.now()/3000.0 )
-                    // f3.uniforms['blurCenter'].value = new THREE.Vector2( 0.5+Math.sin( Date.now()/100)/2.0, 0.5+Math.cos( Date.now()/100)/2.0 )
                     requestAnimationFrame(renderFrame)
                 }
             }
@@ -123,7 +115,7 @@
           canvas{
             position: absolute;
             top: 0; left: 0;
-            width: 90%; height: 75%; padding-top:5%; padding-left: 5%;
+            width: 100%; height: 100%;
           }
           body{ background-color: black;}
         </style>
